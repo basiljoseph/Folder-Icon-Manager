@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -14,14 +14,14 @@ namespace Folder_Icon_Manager
             InitializeComponent();
         }
 
-        private void reset()
+        private void ResetComponents()
         {
             button_change_icon.Enabled = false;
             toolStripStatusLabel1.Text = "Select Folder Icon";
             statusStrip1.Refresh();
         }
 
-        private void show_icon()
+        private void ShowPictureIcon()
         {
             Image image = Image.FromFile(iconFile);
             pictureBox_icon.Image = image;
@@ -45,12 +45,12 @@ namespace Folder_Icon_Manager
             try
             {
                 /* Reset everything */
-                reset();
+                ResetComponents();
 
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
                     iconFile = ofd.FileName;
-                    show_icon();
+                    ShowPictureIcon();
                     button_change_icon.Enabled = true;
                     toolStripStatusLabel1.Text = "Loaded " + Path.GetFileNameWithoutExtension(iconFile); ;
                 }
@@ -66,7 +66,7 @@ namespace Folder_Icon_Manager
             }
         }
 
-        private void set_file_permissions(string path, FileAttributes attributes)
+        private void SetFilePermissions(string path, FileAttributes attributes)
         {
             if (File.Exists(path))
             {
@@ -74,7 +74,7 @@ namespace Folder_Icon_Manager
             }
         }
 
-        private void set_directory_permissions(string path, FileAttributes attributes)
+        private void SetDirectoryPermissions(string path, FileAttributes attributes)
         {
             /* First chech whether we have write permission in the folder */
             DirectoryInfo dirInfo = new DirectoryInfo(path);
@@ -84,14 +84,14 @@ namespace Folder_Icon_Manager
         private void create_desktop_ini(string path, string iconName)
         {
             string desktopIniPath = path + @"\desktop.ini";
-            set_file_permissions(desktopIniPath, FileAttributes.Normal);
+            SetFilePermissions(desktopIniPath, FileAttributes.Normal);
 
             string iniContent = "[.ShellClassInfo]\r\nIconResource=";
             iniContent += iconName;
             iniContent += ",0\r\n";
             File.WriteAllText(desktopIniPath, iniContent);
 
-            set_file_permissions(desktopIniPath, FileAttributes.System | FileAttributes.Hidden);
+            SetFilePermissions(desktopIniPath, FileAttributes.System | FileAttributes.Hidden);
         }
 
         private void button_change_icon_Click(object sender, EventArgs e)
@@ -101,9 +101,9 @@ namespace Folder_Icon_Manager
                 string path = Path.GetDirectoryName(iconFile);
                 string iconName = Path.GetFileName(iconFile);
 
-                set_directory_permissions(path, FileAttributes.Normal);
+                SetDirectoryPermissions(path, FileAttributes.Normal);
                 create_desktop_ini(path, iconName);
-                set_directory_permissions(path, FileAttributes.ReadOnly);
+                SetDirectoryPermissions(path, FileAttributes.ReadOnly);
                 toolStripStatusLabel1.Text = "Icon Set for " + path;
             }
             catch (Exception exp)
