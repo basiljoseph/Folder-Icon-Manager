@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
+#if !__MonoCS__
+using System.Runtime.InteropServices;
+#endif
 
 namespace Folder_Icon_Manager
 {
     public partial class Form1 : Form
     {
+#if !__MonoCS__
         [DllImport("shell32.dll", CharSet = CharSet.Auto)]
         public static extern Int32 SHParseDisplayName(
             [MarshalAs(UnmanagedType.LPWStr)] String pszName,
@@ -23,7 +26,7 @@ namespace Folder_Icon_Manager
             UInt32 uFlags,
             IntPtr dwItem1,
             IntPtr dwItem2);
-
+#endif
         private string iconFile = "";
         public Form1()
         {
@@ -121,7 +124,9 @@ namespace Folder_Icon_Manager
                 create_desktop_ini(path, iconName);
                 SetDirectoryPermissions(path, FileAttributes.ReadOnly);
                 toolStripStatusLabel1.Text = "Icon Set for " + path;
+#if !__MonoCS__
                 RefreshThumbnail(path);
+#endif
             }
             catch (Exception exp)
             {
@@ -134,6 +139,7 @@ namespace Folder_Icon_Manager
             }
         }
 
+#if !__MonoCS__
         private void RefreshThumbnail(string path)
         {
             uint iAttribute;
@@ -145,6 +151,7 @@ namespace Folder_Icon_Manager
                 pidl,
                 IntPtr.Zero);
         }
+#endif
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
