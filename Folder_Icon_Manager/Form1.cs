@@ -1,6 +1,7 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 
@@ -8,6 +9,21 @@ namespace Folder_Icon_Manager
 {
     public partial class Form1 : Form
     {
+        [DllImport("shell32.dll", CharSet = CharSet.Auto)]
+        public static extern Int32 SHParseDisplayName(
+            [MarshalAs(UnmanagedType.LPWStr)] String pszName,
+            IntPtr pbc,
+            out IntPtr ppidl,
+            UInt32 sfgaoIn,
+            out UInt32 psfgaoOut);
+
+        [DllImport("shell32.dll", CharSet = CharSet.Auto)]
+        internal static extern void SHChangeNotify(
+            UInt32 wEventId,
+            UInt32 uFlags,
+            IntPtr dwItem1,
+            IntPtr dwItem2);
+
         private string iconFile = "";
         public Form1()
         {
@@ -105,6 +121,7 @@ namespace Folder_Icon_Manager
                 create_desktop_ini(path, iconName);
                 SetDirectoryPermissions(path, FileAttributes.ReadOnly);
                 toolStripStatusLabel1.Text = "Icon Set for " + path;
+                RefreshThumbnail(path);
             }
             catch (Exception exp)
             {
@@ -115,6 +132,18 @@ namespace Folder_Icon_Manager
             {
                 statusStrip1.Refresh();
             }
+        }
+
+        private void RefreshThumbnail(string path)
+        {
+            uint iAttribute;
+            IntPtr pidl;
+            SHParseDisplayName(path, IntPtr.Zero, out pidl, 0, out iAttribute);
+            SHChangeNotify(
+                (uint)0x00002000,
+                (uint)0x1000,
+                pidl,
+                IntPtr.Zero);
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
